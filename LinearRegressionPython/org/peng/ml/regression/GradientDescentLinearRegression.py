@@ -8,6 +8,8 @@ import os;
 import numpy as np;
 import pandas as pd;
 import matplotlib.pyplot as plt;
+import pylab;
+import time;
 
 def computeCost(X,y,theta):
     inner = np.power((X*theta.T)-y,2);
@@ -43,16 +45,14 @@ def gradientDescent2(X,y,theta,alpha,iters):
     cost = np.zeros(iters);
     for i in range(iters):
         error = (X*theta.T) -y;
-        #if i ==1:
-            #print("gradient descent2.");
-            #print(error[0:10,0]);
+
         theta = theta.T - alpha*(X.T * error)/len(X);
         theta = theta.T;
-        if i==4:
-            print("gradient descent 2.");
-            print(alpha*(X.T * error)/len(X));
-            print("gradient descent 2, theta: ");
-            print(theta);
+        #if i==4:
+            #print("gradient descent 2.");
+            #print(alpha*(X.T * error)/len(X));
+            #print("gradient descent 2, theta: ");
+            #print(theta);
         
         cost[i] = computeCost(X,y,theta);
     return theta, cost;
@@ -66,8 +66,10 @@ data.head();
 #print(data.head());
 #print(data.describe());
 #print(data.plot(kind='scatter', x='Population', y='Profit',figsize=(12,8)));
-#data.plot(kind='scatter', x='Population', y='Profit',figsize=(12,8));
-#plt.show();
+data.plot(kind='scatter', x='Population', y='Profit',figsize=(12,8));
+plt.show();
+pylab.show();
+
 
 data.insert(0,"Ones",1);
 cols = data.shape[1];
@@ -82,9 +84,9 @@ theta = np.matrix(np.array([0,0]));
 #print(computeCost(X,Y,theta));
 alpha = 0.01;
 iters = 1000;
-g,cost = gradientDescent(X,Y,theta,alpha,iters);
-print("gradient descent 1, parameters:")
-print(g);
+#g,cost = gradientDescent(X,Y,theta,alpha,iters);
+#print("gradient descent 1, parameters:")
+#print(g);
 #print(g);
 #print(cost);
 #tempVector = np.matrix(np.array([1,1]));
@@ -94,9 +96,14 @@ print(g);
 #tempMultiVector = tempVector*2;
 #print(tempMultiVector);
 
-g,cost =gradientDescent2(X, Y, theta, alpha, iters);
+beforeRun = time.time();
+for i in range(100):
+    g,cost =gradientDescent2(X, Y, theta, alpha, iters);
 print("gradient descent 2, parameters: ");
 print(g);
+afterRun = time.time();
+print("Duration: ");
+print(afterRun -beforeRun);
 
 
 

@@ -17,6 +17,24 @@ public class Matrix {
 				elements[i][j] =0;
 	}
 	
+	/**
+	 * Create matrix from array
+	 * @param array
+	 * @param vt
+	 */
+	public Matrix(float[] array, VectorType vt) {
+		if(vt == VectorType.ROW_VEC) {
+			this.elements = new float[1][array.length];
+			for(int i=0;i<this.elements[0].length;i++)
+				this.elements[0][i] = array[i];
+		}
+		else if(vt == VectorType.COL_VEC) {
+			this.elements = new float[array.length][1];
+			for(int i=0;i<this.elements.length;i++)
+				this.elements[i][0] = array[i];
+		}
+	}
+	
 	public float[][] getElements(){
 		return elements;
 	}
@@ -44,6 +62,19 @@ public class Matrix {
 	
 	public void setElement(int i, int j, float e) {
 		elements[i][j] = e;
+	}
+	/**
+	 * Get the transpose of the current matrix
+	 * @return
+	 */
+	public Matrix getTranspose() {
+		//Create a new matrix object
+		Matrix transpose = new Matrix(getColNum(), getRowNum());
+		for(int i=0;i<getRowNum();i++)
+			for(int j=0;j<getColNum();j++)
+				transpose.elements[j][i] = elements[i][j];
+		
+		return transpose;
 	}
 	
 	public static Matrix multiply(Matrix m1, Matrix m2) {
@@ -79,6 +110,44 @@ public class Matrix {
 	}
 	
 	
+	public static Matrix plus(Matrix m1, Matrix m2) {
+		//Check the dimenions of the two matrix
+		if(m1.elements == null || m2.elements == null ||
+				m1.getRowNum()!= m2.getRowNum() ||
+				m1.getColNum()!= m2.getColNum())
+			throw new IllegalArgumentException("m1, m2 either empty or their dimension does not agree");
+		Matrix ans = new Matrix(m1.getRowNum(), m1.getColNum());
+		
+		for(int i=0;i<m1.getRowNum();i++)
+			for(int j=0;j<m1.getColNum();j++)
+				ans.elements[i][j] = m1.elements[i][j] + m2.elements[i][j];
+		
+		return ans;
+	}
+	
+	public static Matrix subtract(Matrix m1, Matrix m2) {
+		//Check the dimenions of the two matrix
+		if(m1.elements == null || m2.elements == null ||
+				m1.getRowNum()!= m2.getRowNum() ||
+				m1.getColNum()!= m2.getColNum())
+			throw new IllegalArgumentException("m1, m2 either empty or their dimension does not agree");
+		Matrix ans = new Matrix(m1.getRowNum(), m1.getColNum());
+		
+		for(int i=0;i<m1.getRowNum();i++)
+			for(int j=0;j<m1.getColNum();j++)
+				ans.elements[i][j] = m1.elements[i][j] - m2.elements[i][j];
+				
+		return ans;
+	}
+	
+	public static Matrix multiply(float coeff, Matrix m) {
+		Matrix ans = new Matrix(m.elements);
+		for(int i=0;i<m.getRowNum();i++)
+			for(int j=0;j<m.getColNum();j++) 
+				ans.elements [i][j] *= coeff;
+		return ans;
+	}
+	
 	
 	public static void main(String args[]) {
 		//Matrix 1;
@@ -92,3 +161,4 @@ public class Matrix {
 	}
 	
 }
+
