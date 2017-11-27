@@ -58,7 +58,8 @@ def gradientDescent2(X,y,theta,alpha,iters):
     return theta, cost;
     
 
-os.chdir("/Users/penpen926/workspace/MachineLearningPlayground/data/");
+#os.chdir("/Users/penpen926/workspace/MachineLearningPlayground/data/");
+os.chdir("C:/workspace/MachineLearningPlayground/data/");
 path = os.getcwd()+"/regression_data1.txt";
 
 data = pd.read_csv(path, header= None, names= ['Population', 'Profit']);
@@ -78,7 +79,14 @@ X = data.iloc[:, 0:cols-1];
 Y = data.iloc[:, cols-1:cols];
 
 X = np.matrix(X.values);
+print("X");
+print(X);
 Y = np.matrix(Y.values);
+print("Y");
+print(Y);
+print(np.shape(Y));
+
+
 theta = np.matrix(np.array([0,0]));
 
 #print(computeCost(X,Y,theta));
