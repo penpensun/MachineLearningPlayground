@@ -33,7 +33,7 @@ ax.scatter(negatives['x1'],negatives['x2'],s=50, marker='x',label='Negatives');
 
 fig.savefig("linear_svc_pos_neg.png");
 
-svc = svm.LinearSVC(C=100, loss='hinge',max_iter=1000);
+svc = svm.LinearSVC(C=1000, loss='hinge',max_iter=1000);
 
 svc.fit(data[['x1','x2']],data['y']);
 
@@ -45,8 +45,10 @@ fig,ax = plt.subplots(figsize=(12,8));
 ax.scatter(data['x1'],data['x2'],s=50,c=data['SVM 1 Confidence'],cmap='seismic');
 ax.set_title("SVM Decision Confidence");
 plt.savefig('svm_confidence_linear_svc.png')
-plt.close();
 
+
+svcScore = svc.score(data[['x1','x2']],data['y']);
+print(svcScore);
 
 
 def gaussianKernal(x1,x2,sigma):
