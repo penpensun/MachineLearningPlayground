@@ -13,7 +13,9 @@ from sklearn import svm;
 import pylab;
 import os;
 
-os.chdir("/Users/penpen926/workspace/MachineLearningPlayground/data/")
+#os.chdir("/Users/penpen926/workspace/MachineLearningPlayground/data/")
+os.chdir("c:/workspace/MachineLearningPlayground/data/");
+
 
 def svmEx6Data1():
     rawData = loadmat("ex6data1.mat");
