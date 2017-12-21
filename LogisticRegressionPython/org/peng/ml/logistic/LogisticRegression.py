@@ -58,11 +58,16 @@ def costReg(weights, X, y, learningRate):
 
 def logistic_exercise():
     # change working folder
-    #os.chdir("c:/workspace/MachineLearningPlayground/data/");
-    os.chdir("/Users/penpen926/workspace/MachineLearningPlayground/data/");
+    os.chdir("c:/workspace/MachineLearningPlayground/data/");
+    #os.chdir("/Users/penpen926/workspace/MachineLearningPlayground/data/");
     datafile= "ex2data1.txt";
     # Read the data file
     df = pd.read_csv(datafile,sep=",",names=['exam1','exam2','pass']);
+    
+    #Draw the picture
+    print(type(df['pass'].isin([1])));
+    positives = df[df['pass'].isin([1])];
+    
     #print(df);
     datamatrix = np.matrix(df);
     #print(datamatrix);
@@ -95,8 +100,12 @@ def logistic_exercise():
     predict_result = (predictions == outputs)
     print('Accuracy');
     print(len(predict_result[predict_result == True])/ len(predict_result));
+
+
+
     
-#a = np.matrix([[1,2,5],[3,4,6]]);
+    
+    #a = np.matrix([[1,2,5],[3,4,6]]);
 #print(a[0,1]);
 #print(a[:,1]);
 #print(a.shape);
@@ -107,3 +116,4 @@ def predict(weights, X):
     return [1 if x>=0.5 else 0 for x in np.ravel(prob)];
 
 logistic_exercise();
+
