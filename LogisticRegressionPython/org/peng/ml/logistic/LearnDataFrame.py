@@ -67,4 +67,25 @@ def testDataframe():
     print('sampling');
     print(df1_sample1);
     
+    s1 = pd.Series([1,3,4,5,6,7,10], index = list('abcdefg'));
+    print('Series s1:');
+    print(s1);
+    
+    print('Enlargement by indexing');
+    s1['i'] = 12;
+    print(s1);
+    
+    print('quick accessing and setting');
+    print('quick accessing:');
+    print(s1.iat[2]);
+    print(df1.at['b','B']);
+    print(df1.iat[2,3]);
+    
+    
+    print('Boolean indexing');
+    print(df1[df1['A']>0]);
+    
+    
+    
+    
 testDataframe();
