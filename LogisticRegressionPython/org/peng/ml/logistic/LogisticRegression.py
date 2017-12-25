@@ -8,6 +8,7 @@ import numpy as np;
 import pandas as pd;
 import os;
 import scipy.optimize as opt;
+import matplotlib.pyplot as plt;
 
 weights = [0.00,0.00,0.00];
 alpha = 0.01;
@@ -58,8 +59,8 @@ def costReg(weights, X, y, learningRate):
 
 def logistic_exercise():
     # change working folder
-    os.chdir("c:/workspace/MachineLearningPlayground/data/");
-    #os.chdir("/Users/penpen926/workspace/MachineLearningPlayground/data/");
+    #os.chdir("c:/workspace/MachineLearningPlayground/data/");
+    os.chdir("/Users/penpen926/workspace/MachineLearningPlayground/data/");
     datafile= "ex2data1.txt";
     # Read the data file
     df = pd.read_csv(datafile,sep=",",names=['exam1','exam2','pass']);
@@ -67,6 +68,17 @@ def logistic_exercise():
     #Draw the picture
     print(type(df['pass'].isin([1])));
     positives = df[df['pass'].isin([1])];
+    negatives = df[df['pass'].isin([0])];
+    
+    fig,ax = plt.subplots(figsize=(12,8));
+    ax.scatter(positives['exam1'],positives['exam2'],s = 50, c='b', marker = 'o', label= 'Passed');
+    ax.scatter(negatives['exam1'],negatives['exam2'],s = 50, c = 'r', marker = 'x', label = "Failed");
+    ax.legend();
+    ax.set_xlabel('Exam 1 Score');
+    ax.set_ylabel("Exam 2 Score");
+    plt.savefig("logistic.png");
+    #plt.show();
+    
     
     #print(df);
     datamatrix = np.matrix(df);
