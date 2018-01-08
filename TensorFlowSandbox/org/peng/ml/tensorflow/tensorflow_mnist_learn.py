@@ -77,5 +77,5 @@ def trainData():
         sess.run(tf.global_variables_initializer());
         for i in range (1000):
             batch = mnist.train.next_batch(50);
-            
+
 

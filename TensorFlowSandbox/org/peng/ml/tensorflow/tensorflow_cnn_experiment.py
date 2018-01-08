@@ -3,6 +3,7 @@
 
 import tensorflow as tf;
 import numpy as np;
+from tensorflow.examples.tutorials.mnist import input_data;
 
 def learnConv2d():
     inputTensor = tf.Variable(tf.truncated_normal(shape = [3,10,10,1],mean =0.0, stddev = 0.5));
@@ -44,7 +45,13 @@ def bias_plus_conv_res():
         print("Layer res.");
         print(sess.run(layer_res));
 
+def know_mnist_data():
+    mnist_data = input_data.read_data_sets("/Users/penpen926/workspace/data/data_MNIST", one_hot=True);
+    print(type(mnist_data));
 
 
-bias_plus_conv_res();
+
+#bias_plus_conv_res();
+
 #learnConv2d();
+know_mnist_data();
