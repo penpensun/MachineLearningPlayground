@@ -10,7 +10,8 @@ import pandas as pd;
 from tensorflow.examples.tutorials.mnist import input_data;
 #This module implements the mnist with conv neural network
 
-mnist = input_data.read_data_sets('/Users/penpen926/workspace/data/MNIST_data/', one_hot=True);
+#mnist = input_data.read_data_sets('/Users/penpen926/workspace/data/MNIST_data/', one_hot=True);
+mnist = input.data.read_data_set("c:/workspace/data/", one_hot=True);
 
 def weight_variable(shape):
     initial = tf.truncated_normal(shape,stddev= .1);
