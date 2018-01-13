@@ -46,8 +46,47 @@ def bias_plus_conv_res():
         print(sess.run(layer_res));
 
 def know_mnist_data():
-    mnist_data = input_data.read_data_sets("/Users/penpen926/workspace/data/data_MNIST", one_hot=True);
+    #mnist_data = input_data.read_data_sets("/Users/penpen926/workspace/data/data_MNIST", one_hot=True);
+    mnist_data = input_data.read_data_sets("C:/workspace/data/data_mnist",one_hot=True);
+    print("The type of mnist_data.");
     print(type(mnist_data));
+    next_batch = mnist_data.train.next_batch(10);
+    print("the type of next batch.");
+    print(type(next_batch));
+    print(len(next_batch));
+
+    train = mnist_data.train;
+    print("The type of training data.")
+    print(type(train));
+
+    train_images = mnist_data.train.images;
+    print('The type of train images.');
+    print(type(train_images));
+    print("The shape of train images.");
+    print(train_images.shape);
+
+    train_label = mnist_data.train.labels;
+    print('The type of training labels.');
+    print(type(train_label));
+    print("The shape of training labels.");
+    print(train_label.shape);
+
+    test = mnist_data.test;
+    print('The type of mnist test data.');
+    print(type(test));
+
+
+    print("The first item of the tuple.");
+    print(next_batch[0]);
+    print("The type of the first item of the tuple.");
+    print(type(next_batch[0]));
+    print("The shape of the first item of the tuple.");
+    print(next_batch[0].shape);
+
+
+    print("The second item of the tuple.");
+    print(next_batch[1]);
+
 
 
 
