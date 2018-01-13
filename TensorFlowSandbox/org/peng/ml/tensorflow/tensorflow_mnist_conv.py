@@ -11,7 +11,7 @@ from tensorflow.examples.tutorials.mnist import input_data;
 #This module implements the mnist with conv neural network
 
 #mnist = input_data.read_data_sets('/Users/penpen926/workspace/data/MNIST_data/', one_hot=True);
-mnist = input.data.read_data_set("c:/workspace/data/", one_hot=True);
+mnist = input_data.read_data_sets("c:/workspace/data/data_mnist/", one_hot=True);
 
 def weight_variable(shape):
     initial = tf.truncated_normal(shape,stddev= .1);
@@ -80,8 +80,8 @@ def construct_cnn():
     
     with tf.Session() as sess:
         sess.run(tf.global_variables_initializer());
-        for i in range(3000):
-            batch = mnist.train.next_batch(50);
+        for i in range(1000):
+            batch = mnist.train.next_batch(100);
             if i%100 ==0 :
                 train_accuracy = accuracy.eval(feed_dict ={x:batch[0], y_:batch[1], keep_prob:1.0});
                 print('step %d, training accuracy %g'%(i,train_accuracy));
@@ -89,4 +89,4 @@ def construct_cnn():
     
         print('test accuracy %g'%accuracy.eval(feed_dict={x: mnist.test.images, y_: mnist.test.labels, keep_prob: 1.0}))
     
-construct_cnn()   
+construct_cnn();
