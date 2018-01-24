@@ -185,7 +185,7 @@ def tf_linear_model1():
     #Peform normalization 
     data = (data-data.mean())/data.std();
     
-    #Use tensorflow to train the linear model
+    #Use cnn to train the linear model
     preds = tf.placeholder(tf.float32);
     obs = tf.placeholder(tf.float32);
     w = tf.Variable(0.0,dtype = tf.float32);

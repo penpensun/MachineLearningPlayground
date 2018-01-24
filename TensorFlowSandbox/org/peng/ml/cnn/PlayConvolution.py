@@ -4,7 +4,7 @@ Created on 2017年12月27日
 @author: penpen926
 '''
 
-# In this module, I play and test the convolution in tensorflow
+# In this module, I play and test the convolution in cnn
 #http://blog.csdn.net/u012609509/article/details/71215859
 
 from __future__ import division;
