@@ -13,8 +13,7 @@ def dnn_classifier():
 
     # reset the index
     raw_df['index'] = range(len(raw_df));
-    raw_df.set_index(keys = 'index');
-    raw_df = raw_df.drop(labels = 'index', axis = 1);
+    raw_df = raw_df.set_index(keys = 'index');
     for i in range(len(raw_df)):
         if raw_df.loc[i,'class_str'] == 'Iris-setosa':
             raw_df.loc[i,'class_num'] = 0;
