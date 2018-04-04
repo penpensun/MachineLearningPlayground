@@ -45,4 +45,3 @@ def preprocessing():
     # Convert the word into one-hot vector
     to_num = lambda word: word_num_map.get(word, len(words));
     poetrys_vector = [list(map(to_num, poetry)) for poetry in poetrys];
-    
