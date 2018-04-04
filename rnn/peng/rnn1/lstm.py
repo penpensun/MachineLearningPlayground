@@ -258,9 +258,9 @@ if __name__ == '__main__':
                 _, l, predictions, lr = sess.run(
                     [optimizer, loss, trains_prediciton, learning_rate], feed_dict = feed_dict);
                 mean_loss +=l;
-                print("For test, print the outputs")
-                for i in range(len(outputs)):
-                    print(outputs[i].eval());
+                #print("For test, print the outputs")
+               #for i in range(len(outputs)):
+                #    print(outputs[i].eval(feed_dict = feed_dict));
 
                 if step % summary_frequency == 0:
                     if step >0:
