@@ -144,7 +144,7 @@ def train_neural_network():
                 if(batch % 2000 == 0):
                     print("epoch %d , batch %d is finished"%(epoch, batch));
             if epoch % 7 == 0:
-                saver.save(sess, 'poetry.module', global_step=epoch);
+                saver.save(sess, '/Users/penpen926/workspace/data/poetry.module', global_step=epoch);
             print("epoch %d finished."%epoch);
 def gen_poetry():
     global words;
@@ -161,7 +161,7 @@ def gen_poetry():
     with tf.Session() as sess:
         sess.run(tf.global_variables_initializer());
         saver = tf.train.Saver(tf.all_variables());
-        saver.restore(sess, 'poetry.module-49');
+        saver.restore(sess, '/Users/penpen926/workspace/data/poetry.module-49');
 
         state_ = sess.run(cell.zero_state(1, tf.float32));
         x = np.array([list(map(word_num_map.get, '['))]);
@@ -180,6 +180,7 @@ def gen_poetry():
 
 if __name__ == '__main__':
     poetry_file = "c:/workspace/data/poetry.txt";
+    poetry_file = "/Users/penpen926/workspace/data/poetry.txt";
     # Poetry collections
     poetrys = [];
     read_poetrys();
