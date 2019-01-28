@@ -14,13 +14,14 @@ def init_network(input_number, hidden_number, output_number):
 def feed_forward(inputs, network):
     layer_inputs = inputs;
     for layer in network:
-        print("current layer: ");
-        print(layer);
+        #print("current layer: ");
+        #print(layer);
         for neuron in layer:
             neuron['output'] = transfer(activate(layer_inputs, neuron['weights']));
         layer_inputs = list();
         for neuron in layer:
             layer_inputs.append(neuron['output']);
+    return layer_inputs;
 
 # errors: partial(Loss_funct)/partial(a_i), where a_i is the activated output of a neuron
 # neuron['delta']: partial(Loss_func)/partial(z_i), where z_i is the linear sum of input * weights
@@ -66,23 +67,40 @@ def transfer(input):
 
 
 # This function updates the weights of the network based on the computed partial derivatives.
-def update_weights(inputs, learning_rate, network):
+def update_weights(input, learning_rate, network):
     for i in range(len(network)):
-        layer_inputs = inputs[:-1];
+        layer_input = input[:-1];
         if i != 0:
-            layer_inputs = [neuron['output'] for neuron in network[i - 1]];
+            layer_input = [neuron['output'] for neuron in network[i - 1]];
         for neuron in network[i]:
-            for j in range(len(neuron['weights'] - 1)):
-                neuron['weights'][j] += learning_rate * neuron['delta'] * layer_inputs[j];
+            for j in range(len(neuron['weights']) - 1):
+                neuron['weights'][j] += learning_rate * neuron['delta'] * layer_input[j];
             neuron['weights'][len(neuron['weights']) - 1] += learning_rate * neuron['delta'];
 
 
-def train_network():
-    pass;
+def train_network(train_dataset, network, learning_rate, n_epoch):
+    for epoch in range(n_epoch):
+        sum_error = 0.0;
+        for row in train_dataset:
+            n_output = len(network[-1]);
+            expected = [0 for i in range(n_output)];
+            expected[row[-1]] = 1;
+            # compute the feed foward result
+            output = feed_forward(row, network);
+            # compute the back propagation error
+            bp_error(expected = expected, network = network);
+            # Update the weights
+            update_weights(row, learning_rate = learning_rate, network = network);
+            sum_error += sum( [(expected[i] - output[i]) ** 2 for i in range(len(output))] );
+        print(">epoch = %d, lrate = %.3f, error = %.3f" % (epoch, learning_rate, sum_error))
 
 def derivatives(sigmoid_output):
     return sigmoid_output * (1.0 - sigmoid_output);
 
+
+def predict(input, network):
+    output = feed_forward(input, network);
+    return output.index(max(output));
 
 def test_init():
     random.seed(10);
@@ -117,8 +135,31 @@ def test_bp_error():
         print(layer)
 
 
+def test_training():
+    random.seed(1);
+    dataset = [[2.7810836, 2.550537003, 0],
+               [1.465489372, 2.362125076, 0],
+               [3.396561688, 4.400293529, 0],
+               [1.38807019, 1.850220317, 0],
+               [3.06407232, 3.005305973, 0],
+               [7.627531214, 2.759262235, 1],
+               [5.332441248, 2.088626775, 1],
+               [6.922596716, 1.77106367, 1],
+               [8.675418651, -0.242068655, 1],
+               [7.673756466, 3.508563011, 1]]
+    n_inputs = len(dataset[0]) - 1
+    n_outputs = len(set([row[-1] for row in dataset]))
+    network = init_network(n_inputs, 2, n_outputs)
+    train_network(train_dataset = dataset, network = network, learning_rate = 0.5, n_epoch = 20);
+    for layer in network:
+        print(layer)
+    for row in dataset:
+        prediction = predict(row, network)
+        print('Expected=%d, Got=%d' % (row[-1], prediction))
+
 if __name__ == '__main__':
     #test_network = test_init();
     #test_feed_forward();
-    test_bp_error();
+    #test_bp_error();
+    test_training();
 
