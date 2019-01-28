@@ -14,4 +14,3 @@ h0 = rnnCell.zero_state(batch_size = 32, dtype = tf.float32);
 print("compute the hidden state h1");
 output, h1 = rnnCell.__call__(inputs, h0);
 print(h1);
-output, 
