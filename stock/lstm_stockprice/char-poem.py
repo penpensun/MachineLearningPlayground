@@ -41,5 +41,4 @@ class CharRnn:
     def build_inputs(self):
         with tf.name_scope('inputs'):
             self.inputs = tf.placeholder(tf.int32, shape=(
-                self.num_seqs, self.num_steps), name='inputs')
-            self.targets = tf.
+                ))
