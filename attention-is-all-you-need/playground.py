@@ -1,5 +1,6 @@
 import torch;
 import torch.nn as nn;
+import torch.autograd as autograd
 import torch.nn.functional as F;
 import torch.optim as optim;
 import numpy as np;
@@ -8,6 +9,9 @@ import keras.backend as keback;
 import argparse;
 from preprocess import read_instances_from_file;
 from preprocess import build_vocab_idx;
+import bcolz;
+import pickle;
+
 
 # m1 = np.array([
 #     [1,2,3],
@@ -44,6 +48,13 @@ from preprocess import build_vocab_idx;
 # print('input tensor\n', linear_input);
 # output = linear_model_1(linear_input_transpose);
 # print(output);
+
+glove_path = '/home/peng/Workspace/data/embeddings/glove.42B.300d.txt';
+short_glove_path = '/home/peng/Workspace/data/embeddings/short.glove.42B.300d.txt';
+bcolz_embedding_path = '/home/peng/Workspace/data/embeddings/bcolz_vectors/bcolz_embeddings.dat'
+bcolz_short_embedding_path = '/home/peng/Workspace/data/embeddings/bcolz_vectors/short_bcolz_embeddings.dat'
+word2idx_path = '/home/peng/Workspace/data/embeddings/word2idx.pkl';
+
 
 def test_masked_fill():
     a = torch.tensor([1,2,3,5], dtype = torch.float32);
@@ -100,7 +111,114 @@ def test_build_vocab_idx():
 
 def test_word_embedding():
     torch.manual_seed(2);
-    word_to_index = {'hello': 0, 'world'};
+    word_to_index = {'hello': 0, 'world': 1};
+    embeds = nn.Embedding(2,5); # 2 words in vocab, 5 dimensional embeddings.
+    lookup_tensor = torch.tensor([word_to_index['hello']], dtype=torch.long);
+    hello_embed = embeds(lookup_tensor);
+    print(hello_embed);
+
+
+def test_glove_embeddings():
+    words = [];
+    idx = 0;
+    word2idx = {};
+    vectors = [];
+    with open(glove_path, 'rb') as f:
+        for l in f:
+            line_splits = l.decode().split();
+            word = line_splits[0];
+            words.append(word);
+            word2idx[word] = idx;
+            idx+=1;
+            vect = np.array(line_splits[1:]).astype(np.float);
+            vectors.append(vect)
+    print(vectors[10]);
+    print(word2idx['house']);
+
+
+def test_write_glove_embeddings_bcolz():
+    word2idx = {};
+    words = [];
+    idx = 0;
+    vectors = [];
+    with open(glove_path, 'rb') as f:
+        for l in f:
+            line_splits = l.decode().split();
+            word = line_splits[0];
+            words.append(word);
+            word2idx[word] = idx;
+            idx+=1;
+            vect = np.array(line_splits[1:]).astype(np.float);
+            vectors.append(vect)
+    vectors = np.reshape(vectors, newshape=[-1,300]);
+    vectors = bcolz.carray(vectors, rootdir= f'{bcolz_embedding_path}', mode='w');
+    vectors.flush();
+    #vectors = bcolz.open(f'{bcolz_embeddings_path}')[:]
+    pickle.dump(word2idx, open(f'{word2idx_path}','wb'))
+    #print(vectors[word2idx['house']]);
+
+def test_write_short_glove_embedding_bcolz():
+    word2idx = {};
+    idx = 0;
+    vectors = bcolz.carray(np.zeros(1), rootdir=f'{bcolz_short_embedding_path}', mode='w');
+    with open(short_glove_path, 'rb') as f:
+        for l in f:
+            line_splits = l.decode().split();
+            word = line_splits[0];
+            word2idx[word] = idx;
+            idx+=1;
+            vect = np.array(line_splits[1:]).astype(np.float);
+            vectors.append(vect);
+    vectors = np.reshape(vectors[1:], newshape=[-1, 300]);
+    print(vectors.shape);
+    #vectors = bcolz.carray();
+
+
+def test_load_bcolz_embeddings():
+    bcolz_embeddings_path = '/home/peng/Workspace/data/embeddings/bcolz_vectors/bcolz_embeddings.dat';
+    word2idx_path = '/home/peng/Workspace/data/embeddings/word2idx.pkl';
+    vectors = bcolz.open(f'{bcolz_embeddings_path}', mode='r');
+    word2idx = pickle.load(open(word2idx_path, 'rb'));
+    print(vectors[word2idx['house']]);
+
+# extract the first X rows of the embedding, to play with
+def extract_partial_embedding():
+    head_lines = 20;
+    idx = 0;
+    with open(glove_path, 'r') as f:
+        with open(short_glove_path, 'w') as w:
+            for line in f:
+                print(line);
+                if '\n' in line:
+                    print('line contains linebreak.');
+                idx+=1;
+                if(idx == head_lines):
+                    break;
+                else:
+                    w.write(line);
+            w.close();
+        f.close();
+    print('short version of embedding finished.');
+
+
+def test_load_embedding():
+    # Read in vectors
+    vectors = bcolz.open(bcolz_embedding_path, mode='r');
+    print(vectors.shape);
+    # Read in word2idx
+    word2idx = pickle.load(open(word2idx_path, 'rb'));
+    print(word2idx['kid']);
+    print("kid's embedding is: ");
+    print(vectors[word2idx['kid']]);
+
+def test_lstm():
+    lstm = nn.LSTM(3,3);
+    inputs = [autograd.Variable(torch.randn((1,3))) for _ in range(5)];
+    print(inputs);
+    print(len(inputs));
+    for i in inputs:
+        
+
 
 #test_masked_fill();
 if __name__ == '__main__':
@@ -112,7 +230,15 @@ if __name__ == '__main__':
     #test_read_instances_from_file();
     #test_python_extract_zip();
     #test_nested_for_loop();
-    test_build_vocab_idx();
+    #test_build_vocab_idx();
+    #test_word_embedding();
+    #test_glove_embeddings();
+    #test_write_glove_embeddings_bcolz();
+    #test_load_bcolz_embeddings();
+    #extract_partial_embedding();
+    #test_write_glove_embedding_bcolz();
+    #test_load_embedding();
+    test_lstm();
 
 
 
