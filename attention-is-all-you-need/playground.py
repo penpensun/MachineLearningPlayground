@@ -212,13 +212,28 @@ def test_load_embedding():
     print(vectors[word2idx['kid']]);
 
 def test_lstm():
-    lstm_model = nn.LSTM(10,10);
-    batch_num = 10;
+    batch_size = 10;
     seq_len = 3;
-    inputs = [ [
-        autograd.Variable(torch.randn(10)) for _ in range(seq_len)
-    ]for _ in range(batch_num)]
-    print(len(inputs[0][0]))
+    embedding_size = 20;
+    num_layer = 2;
+    hidden_size = 20;
+    lstm_model = nn.LSTM(embedding_size,embedding_size);
+
+    inputs = [
+        [torch.randn(1,embedding_size) for _ in range(batch_size)]
+        for _ in range(seq_len)
+    ]
+
+    inputs = [autograd.Variable(torch.randn(batch_size, embedding_size))]
+
+    hidden = autograd.Variable(torch.randn(num_layer, batch_size, hidden_size))
+    #print(hidden);
+
+    for input in inputs:
+        out,hidden = lstm_model(input, hidden);
+        print(hidden);
+    
+
 
 
 
@@ -240,7 +255,4 @@ if __name__ == '__main__':
     #extract_partial_embedding();
     #test_write_glove_embedding_bcolz();
     #test_load_embedding();
-    #test_lstm();
-
-
-
+    test_lstm();
