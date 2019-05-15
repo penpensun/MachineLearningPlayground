@@ -227,10 +227,11 @@ def test_lstm():
     inputs = [autograd.Variable(torch.randn(batch_size, embedding_size))]
 
     hidden = autograd.Variable(torch.randn(num_layer, batch_size, hidden_size))
+    print(hidden[0].shape)
     #print(hidden);
 
     for input in inputs:
-        out,hidden = lstm_model(input, hidden);
+        out,hidden = lstm_model(input.view(1, batch_size, embedding_size), hidden);
         print(hidden);
     
 
