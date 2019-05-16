@@ -217,7 +217,7 @@ def test_lstm():
     embedding_size = 20;
     num_layer = 2;
     hidden_size = 20;
-    lstm_model = nn.LSTM(embedding_size,embedding_size);
+    lstm_model = nn.LSTM(embedding_size,embedding_size, num_layers = num_layer);
 
     inputs = [
         [torch.randn(1,embedding_size) for _ in range(batch_size)]
@@ -226,7 +226,8 @@ def test_lstm():
 
     inputs = [autograd.Variable(torch.randn(batch_size, embedding_size))]
 
-    hidden = autograd.Variable(torch.randn(num_layer, batch_size, hidden_size))
+    hidden = (autograd.Variable(torch.randn(num_layer, batch_size, hidden_size)),
+        autograd.Variable(torch.randn(num_layer, batch_size, hidden_size)) )
     print(hidden[0].shape)
     #print(hidden);
 
