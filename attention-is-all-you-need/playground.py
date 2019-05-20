@@ -56,6 +56,35 @@ bcolz_short_embedding_path = '/home/peng/Workspace/data/embeddings/bcolz_vectors
 word2idx_path = '/home/peng/Workspace/data/embeddings/word2idx.pkl';
 
 
+class TestModel(nn.Module):
+    def __init__(self):
+        super(TestModel, self).__init__();
+        self.linear = nn.Linear(300, 10);
+    
+    def forward(self, input):
+        self.hidden = self.linear(input);
+        self.softmax_values = nn.functional.softmax(self.hidden);
+        return self.softmax_values
+
+
+def run_test_model():
+    # test sequence
+    seq = ['this','is','a','test','run'];
+    # load embeddings
+    embeddings = bcolz.open(bcolz_embedding_path, mode = 'r');
+    word2idx = pickle.load(open(word2idx_path, 'rb'));
+
+    seq_embeddings = np.array([embeddings[word2idx[seq[i]]] for i in range(len(seq))]).astype(np.float16);
+    print(seq_embeddings.shape)
+    print(seq_embeddings);
+
+    test_model_1 = TestModel();
+    seq_embeddings_tensor = torch.Tensor(seq_embeddings)
+    print(seq_embeddings_tensor.device)
+    out = test_model_1(seq_embeddings_tensor);
+    print(test_model_1)
+
+
 def test_masked_fill():
     a = torch.tensor([1,2,3,5], dtype = torch.float32);
     mask_tensor = torch.ByteTensor([1,1,0,0]);
@@ -181,6 +210,68 @@ def test_load_bcolz_embeddings():
     word2idx = pickle.load(open(word2idx_path, 'rb'));
     print(vectors[word2idx['house']]);
 
+
+def gen_embedding():
+    word2idx = {};
+    embeddings = [];
+    
+    # open the embedding file
+    with open(short_glove_path, 'rb') as f:
+        for l in f:
+            line_splits = l.decode().split();
+            word = line_splits[0];
+            embed = np.array(line_splits[1:]).astype(np.float16);
+            #print(embed);
+            # get the index
+            idx = len(embeddings) -1;
+            #print('idx: ', idx);
+            word2idx[word] = idx;
+            # push the embed into the embedding array
+            embeddings.append(embed);
+    print('test word embeddings: ');
+    print(embeddings[word2idx['the']]);
+
+
+def gen_bcolz_embedding():
+    word2idx = {};
+    embeddings = []
+    with open(glove_path, 'rb') as f:
+        for l in f:
+            # split the line
+            line_splits = l.decode().split();
+            # get the word
+            word = line_splits[0];
+            # get the index
+            idx = len(embeddings);
+            # assign the value in word2idx
+            word2idx[word] = idx;
+            # append the embed to embeddings
+            embeddings.append(np.array(line_splits[1:]).astype(np.float16));
+    
+    # write to bcolz. 
+    #bcolz_vectors = bcolz.carray(embeddings, rootdir=bcolz_embedding_path, mode = 'w');
+    print('bcolz write finished');
+    # write index with pickle
+    print('dump the word2idx.');
+    pickle.dump(word2idx, open(word2idx_path, 'wb'));
+    print('read the word2idx');
+    test_word2idx = pickle.load(open(word2idx_path, 'rb'));
+    print('test word2idx: terrorist');
+    print(test_word2idx['terrorist']);
+
+
+
+def read_bcolz_embedding():
+    # open the bcolz and read out the embeddings
+    embeddings = bcolz.open(rootdir=bcolz_embedding_path, mode='r');
+    # load the word2idx
+    word2idx = pickle.load(open(word2idx_path, 'rb'));
+    # test the word embeddings
+    print('Embedding for: terrorist');
+    print(embeddings[word2idx['terrorist']]);
+    
+
+
 # extract the first X rows of the embedding, to play with
 def extract_partial_embedding():
     head_lines = 20;
@@ -212,32 +303,46 @@ def test_load_embedding():
     print(vectors[word2idx['kid']]);
 
 def test_lstm():
-    batch_size = 10;
-    seq_len = 3;
-    embedding_size = 20;
-    num_layer = 2;
-    hidden_size = 20;
-    lstm_model = nn.LSTM(embedding_size,embedding_size, num_layers = num_layer);
+    num_layers = 2;
+    hidden_size = 100;
+    embedding_size = 300;
+    batch_size = 50;
+    seq_len = 50;
+    lstm_model = nn.LSTM(input_size = embedding_size, hidden_size = hidden_size, num_layers = num_layers);
 
-    inputs = [
-        [torch.randn(1,embedding_size) for _ in range(batch_size)]
-        for _ in range(seq_len)
-    ]
+    #Create inputs
+    inputs = autograd.Variable(torch.randn(size = (seq_len, batch_size, embedding_size)));
+    # Run the model
+    out, hidden = lstm_model(inputs);
+    print('out:');
+    print(out);
+    print('hidden:');
+    print(hidden);
 
-    inputs = [autograd.Variable(torch.randn(batch_size, embedding_size))]
+    print('out type:');
+    print(type(out));
+    print('Size of out:');
+    print(out.size());
 
-    hidden = (autograd.Variable(torch.randn(num_layer, batch_size, hidden_size)),
-        autograd.Variable(torch.randn(num_layer, batch_size, hidden_size)) )
-    print(hidden[0].shape)
-    #print(hidden);
+    print('hidden type: ');
+    print(type(hidden));
+    print(len(hidden));
+    print('size of the hidden result: ');
+    print(hidden[0].size());
+    print('size of the cell state: ');
+    print(hidden[1].size());
 
-    for input in inputs:
-        out,hidden = lstm_model(input.view(1, batch_size, embedding_size), hidden);
-        print(hidden);
     
+def test_autograd():
+    test_var = autograd.Variable(torch.Tensor([1]), requires_grad = True);
+    cuda_test_var = test_var.cuda();
+    cpu_test_var = test_var.cpu();
+    print('cuda test variable: ', cuda_test_var);
+    print('cpu test variable: ', cpu_test_var);
 
-
-
+    print('data');
+    print('cuda variable data: ', cuda_test_var.data);
+    print('cpu variable data: ', cpu_test_var.data);
 
 #test_masked_fill();
 if __name__ == '__main__':
@@ -257,4 +362,9 @@ if __name__ == '__main__':
     #extract_partial_embedding();
     #test_write_glove_embedding_bcolz();
     #test_load_embedding();
-    test_lstm();
+    #test_lstm();
+    #test_autograd();
+    #gen_embedding();
+    #gen_bcolz_embedding();
+    #read_bcolz_embedding();
+    run_test_model();
