@@ -63,7 +63,7 @@ class TestModel(nn.Module):
     
     def forward(self, input):
         self.hidden = self.linear(input);
-        self.softmax_values = nn.functional.softmax(self.hidden);
+        self.softmax_values = nn.functional.softmax(self.hidden, dim = 0);
         return self.softmax_values
 
 
@@ -79,10 +79,35 @@ def run_test_model():
     print(seq_embeddings);
 
     test_model_1 = TestModel();
-    seq_embeddings_tensor = torch.Tensor(seq_embeddings)
-    print(seq_embeddings_tensor.device)
+    # Check if cuda is available
+    print('is cuda available: ', torch.cuda.is_available());
+    #seq_embeddings_tensor = torch.cuda.FloatTensor(seq_embeddings);
+    seq_embeddings_tensor = torch.Tensor(seq_embeddings);
+    print('the device of variable seq_embeddings_tensor: ', seq_embeddings_tensor.device);
+    
+    # Create cuda device
+    cuda_device = torch.device('cuda:0');
+
+    # Transfer the variable to cuda
+    seq_embeddings_tensor = seq_embeddings_tensor.to(cuda_device)
+    # print the device
+    print("the device of seq_embeddings_tensor: ", seq_embeddings_tensor.device);
+
+    # print out the device of the model
+    
+    print('The device of test_model_1 is cuda: ',next(test_model_1.parameters()).is_cuda);
+    
+    # transfer the model to cuda
+    test_model_1 = test_model_1.to(cuda_device)
+    print('The device of test_model_1 is cuda: ', next(test_model_1.parameters()).is_cuda);
+    
+    # Run the model
     out = test_model_1(seq_embeddings_tensor);
-    print(test_model_1)
+    print(out)
+    #print(torch.cuda.is_available());
+
+    print(out[1,:])
+    print(np.sum(out[1, :], dtype = torch.float16, axis = 1, keepdim = False));
 
 
 def test_masked_fill():
