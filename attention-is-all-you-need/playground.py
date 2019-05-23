@@ -63,8 +63,9 @@ class TestModel(nn.Module):
     
     def forward(self, input):
         self.hidden = self.linear(input);
-        self.softmax_values = nn.functional.softmax(self.hidden, dim = 0);
-        return self.softmax_values
+        #self.softmax_values = nn.functional.softmax(self.hidden, dim = 0);
+        #return self.softmax_values
+        return self.hidden;
 
 
 def run_test_model():
@@ -106,8 +107,18 @@ def run_test_model():
     print(out)
     #print(torch.cuda.is_available());
 
-    print(out[1,:])
-    print(np.sum(out[1, :], dtype = torch.float16, axis = 1, keepdim = False));
+    # print(out[0,:])
+    # print(torch.sum(out[0,:]))
+    # # perform softmax
+    # print(torch.nn.functional.softmax(out[0,:], dim = 0))
+    # print(torch.sum(torch.nn.functional.softmax(out[0,:], dim = 0)));
+
+    # Perform softmax on the output matrix
+    softmax_res = torch.nn.functional.softmax(out, dim = 1)
+    print('softmax on matrix level:');
+    print(softmax_res);
+    print('sum of rows:');
+    print(torch.sum(softmax_res[0,:]))
 
 
 def test_masked_fill():
