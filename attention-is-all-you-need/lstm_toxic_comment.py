@@ -27,9 +27,9 @@ class TestLstm(nn.Module):
 
     def forward(self, inputs):
         out, (hidden, cell_state) = self.lstm_layer(inputs);
-        #out = self.linear_layer(out);
+        out = self.linear_layer(out);
         #out = self.softmax_layer(out);
-        return out, (hidden, cell_state);
+        return out;
 
 
 def create_short_train_file ():
@@ -52,6 +52,10 @@ def test_testlstm():
     word2idx = pickle.load(open(word2idx_path, 'rb'));
     # create the TestLstm class
     test_lstm_model = TestLstm()
+    # define the loss function
+    loss_func = torch.nn.MSELoss();
+    # define the optimizer 
+    optimizer = torch.optim.Adam(test_lstm_model.parameters());
     # calculate the mean of the comment text
     #print(np.mean(train_data['comment_text'].map(lambda x: len(x)).values));
     
@@ -68,26 +72,23 @@ def test_testlstm():
     #print(train_data['comment_text_adjusted'].map(lambda x: len(x)))
     for i in range(len(train_data)):
         # get the comment string
-        comment_text = train_data.iloc[i,:].comment_text_adjusted;
-        # get the target score
-        target_score = train_data.iloc[i,:].target;
-        # get the embedding of the comment_text
-        # get the word2idx indexes.
-        comment_text_idx = [word2idx.get(comment_text[j], word2idx['unk']) for j in range(len(comment_text)) ];
-        # get the embeddings.
-        comment_text_embeds = [embeddings[comment_text_idx[j]] for j in range(len(comment_text_idx))]
+        comment_text = train_data.iloc[i,:].comment_text_adjusted;        
+        target_score = torch.tensor(train_data.iloc[i,:].target, dtype = torch.float16); # get the target score
+        comment_text_idx = [word2idx.get(comment_text[j], word2idx['unk']) for j in range(len(comment_text)) ]; # get the word2idx indexes.
+        comment_text_embeds = [embeddings[comment_text_idx[j]] for j in range(len(comment_text_idx))] #get the embeddings
+        comment_text_embeds = torch.Tensor(np.array(comment_text_embeds).astype(np.float16)); # convert the data type.
         
-        #print(type(comment_text_embeds));
-        #print(len(comment_text_embeds));
-        comment_text_embeds = torch.Tensor(np.array(comment_text_embeds).astype(np.float16));
-        #print(comment_text_embeds.shape);
-        # create a test tensor
-        #test_tensor = torch.randn([300,1,300])
-        out = test_lstm_model(comment_text_embeds.view([seq_num,1,embedding_size]));
+        out = test_lstm_model(comment_text_embeds.view([seq_num,1,embedding_size])); #compute the cost
+        #print(train_data.iloc[i,:]);
         print(out);
-        # for test, break at loop2
-        if i == 0: 
-            break;
+        # compute the loss
+        loss = loss_func(out, target_score);
+        #print(loss);
+        # compute the backward gradient
+        loss.backward();
+        # optimize the weights
+        optimizer.step();
+        #print(out);
 
 def check_default_value_dic():
     word2idx = pickle.load(open(word2idx_path, 'rb'))
