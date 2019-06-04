@@ -29,6 +29,7 @@ class TestLstm(nn.Module):
         out, (hidden, cell_state) = self.lstm_layer(inputs);
         out = self.linear_layer(out);
         #out = self.softmax_layer(out);
+        print('inside forward, out shape: ', out.size());
         return out;
 
 
@@ -80,10 +81,15 @@ def test_testlstm():
         
         out = test_lstm_model(comment_text_embeds.view([seq_num,1,embedding_size])); #compute the cost
         #print(train_data.iloc[i,:]);
-        print(out);
+        #print(out);
+        print('output shape: ');
+        print(out.shape);
+        print('target score shape: ');
+        print(target_score.shape);
+       
         # compute the loss
         loss = loss_func(out, target_score);
-        #print(loss);
+        print(loss);
         # compute the backward gradient
         loss.backward();
         # optimize the weights
