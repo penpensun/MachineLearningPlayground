@@ -81,11 +81,11 @@ def test_testlstm():
         
         out = test_lstm_model(comment_text_embeds.view([seq_num,1,embedding_size])); #compute the cost
         #print(train_data.iloc[i,:]);
-        print('out: ',out);
+        #print('out: ',out);
         #print('output shape: ');
         #print(out.shape);
-        print('target score: ');
-        print(target_score);
+        #print('target score: ');
+        #print(target_score);
         target_score = target_score.float();
         # compute the loss
         loss = loss_func(out, target_score);
