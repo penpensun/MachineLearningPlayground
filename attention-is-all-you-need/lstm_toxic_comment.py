@@ -5,16 +5,18 @@ import torch;
 import torch.autograd as autograd;
 import bcolz;
 import pickle;
+from sklearn.model_selection import train_test_split;
 
 # The path of glove embeddings
 toxic_comment_input_path = '/home/peng/Workspace/data/kaggle/jigsaw/train.csv';
 short_toxic_comment_input_path = '/home/peng/Workspace/data/kaggle/jigsaw/short_train.csv';
 bcolz_embedding_path = '/home/peng/Workspace/data/embeddings/bcolz_vectors/bcolz_embeddings.dat';
 word2idx_path = '/home/peng/Workspace/data/embeddings/word2idx.pkl';
-batch = 100;
+batch_size = 100;
 hidden_num = 100;
 seq_num = 300;
 embedding_size = 300;
+target_col_name = 'target'
 
 
 class TestLstm(nn.Module):
@@ -43,6 +45,52 @@ def create_short_train_file ():
                 idx += 1;
                 if idx == 100:
                     break;
+
+'''
+This method get the batch idx
+'''
+def get_batch (batch_idx, train_data):
+    print(len(train_data));
+    if (batch_idx + 1) * batch_size >= len(train_data):
+        return train_data[batch_idx * batch_size: len(train_data)];
+    else:
+        print("second option: ", (batch_idx + 1) * batch_size);
+        return train_data[batch_idx * batch_size : (batch_idx + 1) * batch_size];
+
+'''
+This method performs the preprocessing.
+'''
+def preprocessing():
+    #train_data = pd.read_csv(toxic_comment_input_path); # read the toxic comment data
+    # for test purpose, just read in the short version of the input
+    train_data = pd.read_csv(short_toxic_comment_input_path);
+    columns = train_data.columns.tolist();
+    columns.remove(target_col_name)
+
+    train_features = train_data[columns] # get the train features
+    train_target = train_data[target_col_name]; # get the train targets
+    print(train_features.shape);
+
+
+
+'''
+This function splits the dataset into
+'''
+def split_dataset ():
+    pass;
+
+'''
+Test if get batch works
+'''
+def test_get_batch():
+    # Read the train data
+    train_data = pd.read_csv(toxic_comment_input_path);
+    # test get batch
+    batch_dataset = get_batch(0, train_data);
+    #print(train_data.shape);
+    print(batch_dataset);
+    print(batch_dataset.shape);
+        
 
 def test_testlstm():
     # Read in the data
@@ -108,6 +156,9 @@ def check_default_value_dic():
 
 if __name__ == '__main__':
     #create_short_train_file();
-    test_testlstm();
+    #test_testlstm();
+    #test_get_batch();
+    preprocessing();
+
     #check_default_value_dic();
     
