@@ -61,7 +61,7 @@ def train(**kwargs):
 
     torch.set_default_tensor_type('torch.cuda.FloatTensor');
 
-    model = TestLstm(seq_num = pp.seq_num, hidden_num = pp.hidden_num).cuda(); # Define the model
+    model = TestLstm(feature_size = pp.feature_size, hidden_size = pp.hidden_size).cuda(); # Define the model
     loss = nn.CrossEntropyLoss(); # Define the loss function
     optimizer = torch.optim.Adam(model.parameters()); # Define the optimizer
 
@@ -89,10 +89,12 @@ def train(**kwargs):
             for in_batch_idx in range(len(batch_x)):
                 # get the embeddings
                 comment_text = batch_x.iloc[in_batch_idx,:].comment_text_adjusted; # get the comment string
+                if not comment_text.strip():
+                    continue;
                 target_score = torch.tensor(batch_y.iloc[in_batch_idx], dtype = torch.long); # get the target score
                 comment_splits = comment_text.split(); # split the comment text
                 comment_text_idx = [word2idx.get(comment_splits[j], word2idx['unk']) for j in range(len(comment_splits)) ]; # get the word2idx indexes.
-                print('comment text idx: ', comment_text_idx);
+                #print('comment text idx: ', comment_text_idx);
                 comment_text_embeds = [embeddings[comment_text_idx[j]] for j in range(len(comment_text_idx))] #get the embeddings
                 comment_text_embeds = torch.Tensor(np.array(comment_text_embeds).astype(np.float16)); # convert the data type.
                 out = model(comment_text_embeds.view([len(comment_splits), 1, pp.embedding_size])); #compute the cost
@@ -113,9 +115,11 @@ def train(**kwargs):
         # after one epoch, test the model on val
         for val_idx in range(len(x_val)):
             comment_text = x_val.iloc[val_idx,:].comment_text_adjusted; # get the comment string
+            if not comment_text.strip():
+                continue;
             target_score = torch.tensor(y_val.iloc[val_idx], dtype = torch.long); # get the target score
-            comment_split = comment_text.split(); # split the comment text
-            comment_text_idx = [word2idx.get(comment_split[j], word2idx['unk']) for j in range(len(comment_split)) ]; # get the word2idx indexes.
+            comment_splits = comment_text.split(); # split the comment text
+            comment_text_idx = [word2idx.get(comment_splits[j], word2idx['unk']) for j in range(len(comment_splits)) ]; # get the word2idx indexes.
             comment_text_embeds = [embeddings[comment_text_idx[j]] for j in range(len(comment_text_idx))] #get the embeddings
             comment_text_embeds = torch.Tensor(np.array(comment_text_embeds).astype(np.float16)); # convert the data type.
             out = model(comment_text_embeds.view([len(comment_splits),1,pp.embedding_size])); #compute the cost
