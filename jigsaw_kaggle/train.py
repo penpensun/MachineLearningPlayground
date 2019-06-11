@@ -167,6 +167,42 @@ def train(**kwargs):
     print('model saved.');
 
 
+'''
+Got always 0.94 accuracy for train and for val. must check what happens
+'''
+def test_result():
+    torch.set_default_tensor_type('torch.cuda.FloatTensor');
+    data = pp.comment_preprocessing(pd.read_csv(pp.short_toxic_comment_input_path));
+    print('length of data: ', len(data));
+    print('length of toxic data: ', len(data[data['is_toxic'] == 1]));
+
+    word2idx,embeddings = pp.load_word2idx_embeddings();
+
+    model = TestLstm(feature_size = pp.feature_size, hidden_size = pp.hidden_size).cuda(); # Define the model
+    loss = nn.CrossEntropyLoss(); # Define the loss function
+    optimizer = torch.optim.Adam(model.parameters()); # Define the optimizer
+    out_array = [];
+    #return;
+    for i in range(len(data)):
+        comment_text = data.iloc[i,:].comment_text_adjusted; # get the comment string
+        if not comment_text.strip():
+            continue;
+        target_score = torch.tensor(data.iloc[i].is_toxic, dtype = torch.long); # get the target score
+        #print('target : ', target_score.item());
+        comment_splits = comment_text.split(); # split the comment text
+        comment_text_idx = [word2idx.get(comment_splits[j], word2idx['unk']) for j in range(len(comment_splits)) ]; # get the word2idx indexes.
+        #print('comment text idx: ', comment_text_idx);
+        comment_text_embeds = [embeddings[comment_text_idx[j]] for j in range(len(comment_text_idx))] #get the embeddings
+        comment_text_embeds = torch.Tensor(np.array(comment_text_embeds).astype(np.float16)); # convert the data type.
+        out = model(comment_text_embeds.view([len(comment_splits), 1, pp.embedding_size])); #compute the cost 
+        loss_value = loss(out.view(-1, 2), target_score.view(-1));
+        loss_value.backward(); # compute the backward gradient
+        optimizer.step(); # carry on the training
+        print('out value: ', out, ' argmax: ',torch.argmax(out).item());
+        #out_array.append([out, torch.argmax(out).item()])
+
+
+
 
 def run():
     word2idx, embeddings = pp.load_word2idx_embeddings(); # load word2idx and embeddings
@@ -190,3 +226,4 @@ def run():
 
 if __name__ == '__main__':
     run();
+    #test_result();
