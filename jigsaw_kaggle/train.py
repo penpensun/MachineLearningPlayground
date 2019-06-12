@@ -3,6 +3,7 @@ import torch;
 import torch.nn as nn;
 from model import TestLstm;
 import numpy as np;
+import datetime;
 
 
 word2idx, embeddings = pp.load_word2idx_embeddings()
@@ -74,6 +75,7 @@ def train(**kwargs):
 
     for epoch_idx in range(pp.epoch_size):
         print("epoch: ", (epoch_idx+1))
+        starttime = datetime.datetime.now(); # get start time
         # for test
         #if epoch_idx > 0:
          #   break;
@@ -85,6 +87,7 @@ def train(**kwargs):
         for idx in range(max_batch_idx+1):
             batch_x = pp.get_batch(idx, x_train); # get the batch features
             batch_y = pp.get_batch(idx, y_train); # get the batch targets
+
             # train in the batch
             for in_batch_idx in range(len(batch_x)):
                 # get the embeddings
@@ -132,7 +135,7 @@ def train(**kwargs):
         # Append the loss to the train_losses and val_losses lists
         train_loss = train_loss.item() / len(x_train);
         val_loss = val_loss.item() / len(x_val);
-        print('train_loss: ', train_loss);
+        #print('train_loss: ', train_loss);
         train_losses.append(train_loss);
         val_losses.append(val_loss);
         
@@ -141,12 +144,14 @@ def train(**kwargs):
         val_accuracy = val_accuracy / len(x_val);
         train_accuracies.append(train_accuracy);
         val_accuracies.append(val_accuracy);
-
+        
+        endtime = datetime.datetime.now(); #get end time
+        print('end time - start time: ', endtime - starttime);
         # output the results
         # loss on train data:
         print('epoch ',epoch_idx+1);
-        print('training loss: ', train_loss);
-        print('val loss: ', val_loss);
+        #print('training loss: ', train_loss);
+        #print('val loss: ', val_loss);
         print('train accuracy: ', train_accuracy);
         print('val accuracy: ', val_accuracy);
     
@@ -167,39 +172,39 @@ def train(**kwargs):
     print('model saved.');
 
 
-'''
-Got always 0.94 accuracy for train and for val. must check what happens
-'''
-def test_result():
-    torch.set_default_tensor_type('torch.cuda.FloatTensor');
-    data = pp.comment_preprocessing(pd.read_csv(pp.short_toxic_comment_input_path));
-    print('length of data: ', len(data));
-    print('length of toxic data: ', len(data[data['is_toxic'] == 1]));
+# '''
+# Got always 0.94 accuracy for train and for val. must check what happens
+# '''
+# def test_result():
+#     torch.set_default_tensor_type('torch.cuda.FloatTensor');
+#     data = pp.comment_preprocessing(pd.read_csv(pp.short_toxic_comment_input_path));
+#     print('length of data: ', len(data));
+#     print('length of toxic data: ', len(data[data['is_toxic'] == 1]));
 
-    word2idx,embeddings = pp.load_word2idx_embeddings();
+#     word2idx,embeddings = pp.load_word2idx_embeddings();
 
-    model = TestLstm(feature_size = pp.feature_size, hidden_size = pp.hidden_size).cuda(); # Define the model
-    loss = nn.CrossEntropyLoss(); # Define the loss function
-    optimizer = torch.optim.Adam(model.parameters()); # Define the optimizer
-    out_array = [];
-    #return;
-    for i in range(len(data)):
-        comment_text = data.iloc[i,:].comment_text_adjusted; # get the comment string
-        if not comment_text.strip():
-            continue;
-        target_score = torch.tensor(data.iloc[i].is_toxic, dtype = torch.long); # get the target score
-        #print('target : ', target_score.item());
-        comment_splits = comment_text.split(); # split the comment text
-        comment_text_idx = [word2idx.get(comment_splits[j], word2idx['unk']) for j in range(len(comment_splits)) ]; # get the word2idx indexes.
-        #print('comment text idx: ', comment_text_idx);
-        comment_text_embeds = [embeddings[comment_text_idx[j]] for j in range(len(comment_text_idx))] #get the embeddings
-        comment_text_embeds = torch.Tensor(np.array(comment_text_embeds).astype(np.float16)); # convert the data type.
-        out = model(comment_text_embeds.view([len(comment_splits), 1, pp.embedding_size])); #compute the cost 
-        loss_value = loss(out.view(-1, 2), target_score.view(-1));
-        loss_value.backward(); # compute the backward gradient
-        optimizer.step(); # carry on the training
-        print('out value: ', out, ' argmax: ',torch.argmax(out).item());
-        #out_array.append([out, torch.argmax(out).item()])
+#     model = TestLstm(feature_size = pp.feature_size, hidden_size = pp.hidden_size).cuda(); # Define the model
+#     loss = nn.CrossEntropyLoss(); # Define the loss function
+#     optimizer = torch.optim.Adam(model.parameters()); # Define the optimizer
+#     out_array = [];
+#     #return;
+#     for i in range(len(data)):
+#         comment_text = data.iloc[i,:].comment_text_adjusted; # get the comment string
+#         if not comment_text.strip():
+#             continue;
+#         target_score = torch.tensor(data.iloc[i].is_toxic, dtype = torch.long); # get the target score
+#         #print('target : ', target_score.item());
+#         comment_splits = comment_text.split(); # split the comment text
+#         comment_text_idx = [word2idx.get(comment_splits[j], word2idx['unk']) for j in range(len(comment_splits)) ]; # get the word2idx indexes.
+#         #print('comment text idx: ', comment_text_idx);
+#         comment_text_embeds = [embeddings[comment_text_idx[j]] for j in range(len(comment_text_idx))] #get the embeddings
+#         comment_text_embeds = torch.Tensor(np.array(comment_text_embeds).astype(np.float16)); # convert the data type.
+#         out = model(comment_text_embeds.view([len(comment_splits), 1, pp.embedding_size])); #compute the cost 
+#         loss_value = loss(out.view(-1, 2), target_score.view(-1));
+#         loss_value.backward(); # compute the backward gradient
+#         optimizer.step(); # carry on the training
+#         print('out value: ', out, ' argmax: ',torch.argmax(out).item());
+#         #out_array.append([out, torch.argmax(out).item()])
 
 
 
