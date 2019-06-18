@@ -4,11 +4,12 @@ import torch.autograd as autograd
 import torch.nn.functional as F;
 import torch.optim as optim;
 import numpy as np;
+import pandas as pd;
 
 import keras.backend as keback;
 import argparse;
-from preprocess import read_instances_from_file;
-from preprocess import build_vocab_idx;
+#from preprocess import read_instances_from_file;
+#from preprocess import build_vocab_idx;
 import bcolz;
 import pickle;
 
@@ -380,6 +381,21 @@ def test_autograd():
     print('cuda variable data: ', cuda_test_var.data);
     print('cpu variable data: ', cpu_test_var.data);
 
+
+def test_matrix_in_df():
+    columns = ['matrix', 'target'];
+    data = [
+        [np.array([[1.,2.],[3.,4.]]), 1],
+        [np.array([[5.,6.,7.],[8.,9.,10.]]), 2]
+    ];
+    df = pd.DataFrame(data, columns);
+    print(df);
+
+def test_map_func():
+    x = [1,2,3,4,5];
+    x = [i for i in map(lambda x: x**2, x)]
+    print(x);
+
 #test_masked_fill();
 if __name__ == '__main__':
     #parser = argparse.ArgumentParser()
@@ -403,4 +419,6 @@ if __name__ == '__main__':
     #gen_embedding();
     #gen_bcolz_embedding();
     #read_bcolz_embedding();
-    run_test_model();
+    #run_test_model();
+    #test_matrix_in_df();
+    test_map_func();
