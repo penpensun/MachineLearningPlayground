@@ -42,6 +42,9 @@ if 'config' not in globals():
     model_file = config['model_file'];
     processed_toxic_comment_input_path = config['processed_toxic_comment_input_path']
     pretrained_embeds_path = config['pretrained_embeds_path']
+    feature_cols = config['feature_cols'].split(',')
+    target_col = config['target_col']
+    sentence_length = int(config ['sentence_length']);
 
 
 #print(toxic_comment_input_path);

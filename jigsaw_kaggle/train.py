@@ -7,6 +7,8 @@ import configuration as config;
 import embeddings as embeds;
 import preprocess;
 import batch_gen;
+import sklearn.svm as svm;
+import pandas as pd;
 
 '''
 This function performs the training;
@@ -133,6 +135,16 @@ def train():
     #torch.save (model.state_dict(), pp.model_file);
     #print('model saved.');
 
+
+'''
+This function performs the training using
+'''
+
+def train_svm():
+    print('svm training started...');
+    train_data = pd.read_csv(config.processed_toxic_comment_input_path);
+    
+    train_data = train_data[['comment_embeddings','is_toxic']]
 
 # '''
 # Got always 0.94 accuracy for train and for val. must check what happens

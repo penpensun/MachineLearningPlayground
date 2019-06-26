@@ -35,15 +35,14 @@ def write_glove_embeddings_bcolz():
 '''
 This function create a shorter version of the input data, for test purpse
 '''
-def create_short_train_file ():
+def create_short_train_file (num_lines):
     with open (config.toxic_comment_input_path, 'r') as f_train:
         with open(config.short_toxic_comment_input_path, 'w') as f_short_train:
             idx = 0;
-            max_idx = 5001;
             for line in f_train:
                 f_short_train.write(line);
                 idx += 1;
-                if idx == max_idx:
+                if idx == num_lines:
                     break;
     print("short train file successfully created.");
 
@@ -51,13 +50,9 @@ def create_short_train_file ():
 '''
 This method performs the comment preprocessing.
 '''
-def comment_preprocessing(df):
+def comment_preprocessing(df, ):
     print('inside comment preprocessing.');
-    # Adjust the length of the comments:
-    #df['comment_text_adjusted'] = df.apply(lambda x: x['comment_text'].ljust(seq_num, ' '), axis = 1);
-    # Truncate the comment_text.
-    #df['comment_text_adjusted'] = df.comment_text_adjusted.map(lambda x: x[:seq_num] if len(x) > seq_num else x);
-    # filter out the non-number and non alphabetical characters
+     # filter out the non-number and non alphabetical characters
     df['comment_text_adjusted'] = df.comment_text.map(filter_special_char);
     # turn all letters to lower case.
     df['comment_text_adjusted'] = df.comment_text_adjusted.map(lambda x: x.lower());
@@ -92,13 +87,12 @@ def handle_missing_data (data: pd.DataFrame, feature_cols: list) -> pd.DataFrame
 '''
 Adjust comment column
 '''
-def adjust_comment_col (data: pd.DataFrame ) -> pd.DataFrame:
-    # print('inside comment preprocessing.');
-    # Adjust the length of the comments:
-    #df['comment_text_adjusted'] = df.apply(lambda x: x['comment_text'].ljust(seq_num, ' '), axis = 1);
-    # Truncate the comment_text.
-    #df['comment_text_adjusted'] = df.comment_text_adjusted.map(lambda x: x[:seq_num] if len(x) > seq_num else x);
-    # filter out the non-number and non alphabetical characters
+def adjust_comment_col (data: pd.DataFrame, adjust_sentence_length = False) -> pd.DataFrame:
+    if adjust_sentence_length:
+        # Adjust the length of the comments:
+        data['comment_text_adjusted'] = data.apply(lambda x: x['comment_text'].ljust(config.sentence_length, ' '), axis = 1);
+        # Truncate the comment_text.
+        data['comment_text_adjusted'] = data.comment_text_adjusted.map(lambda x: x[:config.sentence_length] if len(x) > config.sentence_length else x);
     print('adjust comment text ...')
     data['comment_text_adjusted'] = data.comment_text.map(filter_special_char);
     # turn all letters to lower case.
@@ -124,8 +118,12 @@ Assign embedding matrix. This function generates a column for the dataframe, ass
 '''
 def assign_embeddings(data: pd.DataFrame) -> pd.DataFrame:
     print('assign embeddings ...')
-    data['comment_embeddings'] = [[] for _ in range(len(data))];
-    data = data.apply(gen_comment_embedding, axis = 1);
+    #data['comment_embeddings'] = [[] for _ in range(len(data))];
+    #data = data.apply(gen_comment_embedding, axis = 1);
+    #print('inside assign embeddings: ', data.comment_text_adjusted);
+    data['comment_embeddings'] = data.comment_text_adjusted.map(
+        lambda x: ','.join(str(embeds.word2idx.get(item, embeds.word2idx['unk'])) for item in x.split()) ) 
+    print('inside assign embeddings: ', data.comment_embeddings);
     return data;
 
 '''
@@ -161,7 +159,7 @@ def run_pipeline(debug = False):
     train_data = read_in_data(debug); # read in data
     train_data = assign_embeddings( # assign embeddings to the comment column
         gen_is_toxic_col( # generate the is_toxic column
-        adjust_comment_col(train_data) # adjust the comment column
+        adjust_comment_col(train_data, True) # adjust the comment column
         )
         )
     
@@ -174,10 +172,10 @@ def run_pipeline_out(debug = False):
     train_data = read_in_data(debug); # read in data
     train_data = assign_embeddings( # assign embeddings to the comment column
         gen_is_toxic_col( # generate the is_toxic column
-        adjust_comment_col(train_data) # adjust the comment column
+        adjust_comment_col(train_data, False) # adjust the comment column
         )
         )
-    train_data.write_csv(config.processed_toxic_comment_input_path);
+    train_data.to_csv(config.processed_toxic_comment_input_path);
 
 ##################################
 ## Test functions
@@ -212,14 +210,10 @@ def test_assign_embeddings():
     #print('type of df: ', type(df));
     assign_embeddings(df)
     print('comment text: ', comment_text);
-    print('embeddings: ', df['comment_embeddings'].iloc[0])
     embeds_res = df['comment_embeddings'].iloc[0];
-
-    embeds_expected = np.array(
-        [item for item in map(lambda x: embeds.embeddings[embeds.word2idx.get(x, 'unk')], 'this is a text sentence'.split())],
-        dtype = np.float16
-    )
-
+    embeds_expected = [item for item in map(lambda x: embeds.word2idx.get(x, 'unk'), 'this is a text sentence'.split())]
+    print('res embeddings: ', embeds_res)
+    print('exp embeddings: ', embeds_expected);
     print(embeds_res == embeds_expected);
 
 
@@ -263,6 +257,8 @@ def test_embeddings():
 if __name__ == '__main__':
     #test_assign_embeddings();
     #test_run_pipeline();
-    test_embeddings();
+    #test_embeddings();
     #run_pipeline_out();
     #write_glove_embeddings_bcolz();
+    create_short_train_file(10010);
+    run_pipeline_out(True);
